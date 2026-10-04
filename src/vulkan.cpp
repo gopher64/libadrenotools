@@ -22,7 +22,7 @@ std::string self_lib_dir() {
 
   std::string path{info.dli_fname};
   auto slash{path.find_last_of('/')};
-  return slash == std::string::npos ? std::string{} : path.substr(0, slash);
+  return slash == std::string::npos ? std::string{} : path.substr(0, slash + 1);
 }
 
 void ensure_libvulkan() {
@@ -33,9 +33,9 @@ void ensure_libvulkan() {
   if (hookLibDir.empty())
     return;
 
-  g_libvulkan =
-      adrenotools_open_libvulkan(RTLD_NOW, 0, nullptr, hookLibDir.c_str(),
-                                 nullptr, nullptr, nullptr, nullptr);
+  g_libvulkan = adrenotools_open_libvulkan(
+      RTLD_NOW, ADRENOTOOLS_DRIVER_CUSTOM, nullptr, hookLibDir.c_str(),
+      hookLibDir.c_str(), "libvulkan_freedreno.so", nullptr, nullptr);
   if (!g_libvulkan)
     return;
 
