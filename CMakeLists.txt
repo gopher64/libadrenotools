@@ -12,9 +12,11 @@ add_subdirectory(lib/linkernsbypass)
 
 set(LIB_SOURCES src/bcenabler.cpp
                 src/driver.cpp
+                src/vulkan.cpp
                 include/adrenotools/bcenabler.h
                 include/adrenotools/driver.h
-                include/adrenotools/priv.h)
+                include/adrenotools/priv.h
+                include/adrenotools/vulkan.h)
 
 add_library(adrenotools ${LIB_SOURCES})
 
