@@ -3,6 +3,7 @@
 #include <adrenotools/driver.h>
 #include <adrenotools/vulkan.h>
 #include <dlfcn.h>
+#include <filesystem>
 #include <string>
 
 namespace {
@@ -26,6 +27,8 @@ std::string self_lib_dir() {
 }
 
 void ensure_libvulkan() {
+  namespace fs = std::filesystem;
+
   if (g_libvulkan)
     return;
 
@@ -33,9 +36,21 @@ void ensure_libvulkan() {
   if (hookLibDir.empty())
     return;
 
+  const char *base = getenv("GOPHER64_INTERNAL_DATA_PATH");
+  if (!base)
+    return;
+
+  fs::path redirect = fs::path(base) / "gpu" / "redirect";
+
+  std::error_code ec;
+  fs::create_directories(redirect, ec); // must exist before the call below
+  if (ec)
+    return;
+
   g_libvulkan = adrenotools_open_libvulkan(
-      RTLD_NOW, ADRENOTOOLS_DRIVER_CUSTOM, nullptr, hookLibDir.c_str(),
-      hookLibDir.c_str(), "libvulkan_freedreno.so", nullptr, nullptr);
+      RTLD_NOW, ADRENOTOOLS_DRIVER_FILE_REDIRECT | ADRENOTOOLS_DRIVER_CUSTOM,
+      nullptr, hookLibDir.c_str(), hookLibDir.c_str(), "libvulkan_freedreno.so",
+      redirect.c_str(), nullptr);
   if (!g_libvulkan)
     return;
 
